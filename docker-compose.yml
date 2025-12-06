@@ -13,7 +13,6 @@ services:
       - pg
     volumes:
       - ./server:/usr/src/app/:z
-      - /usr/src/app/node_modules #ignore node_modules (they are installed in the container)
       - ./common:/usr/src/common:z
       - staticfiles:/usr/client/build
   pg:
@@ -25,7 +24,7 @@ services:
     env_file:
       - ./pg/database.env
     volumes:
-      - ./pg/db_data:/var/lib/postgresql/data:z
+      - ./pg/db_data:/var/lib/postgresql:z
   client:
     container_name: "client"
     build:

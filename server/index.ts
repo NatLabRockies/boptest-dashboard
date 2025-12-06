@@ -1,4 +1,5 @@
 import express from 'express';
+import morgan from 'morgan';
 import cors from 'cors';
 import path from 'path';
 import bodyParser from 'body-parser';
@@ -17,6 +18,9 @@ import {connectToDb} from './db';
 import {getAccountById} from './controllers/account';
 
 const app: express.Application = express();
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
+}
 
 // Configure CORS to allow credentials
 const rawOrigins = process.env.CORS_ORIGINS || '';
