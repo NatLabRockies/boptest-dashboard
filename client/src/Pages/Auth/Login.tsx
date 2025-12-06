@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Typography, Link as MuiLink, Divider } from '@material-ui/core';
+import { Typography, Link as MuiLink, Divider, Checkbox, FormControlLabel } from '@material-ui/core';
 import Paper from '@material-ui/core/Paper';
 import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -8,8 +8,7 @@ import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
 import {AlertProps} from '@material-ui/lab/Alert';
 import {SvgIconProps} from '@material-ui/core/SvgIcon';
-import { useUser } from './../../Context/user-context';
-import { useHistory, useLocation } from 'react-router-dom';
+import { legalNoticeParagraphs } from './legalContent';
 
 // Icons for OAuth buttons
 import GitHubIcon from '@material-ui/icons/GitHub';
@@ -79,6 +78,35 @@ const useStyles = makeStyles((theme: Theme) =>
       width: '100%',
       marginTop: '1em',
     },
+    legalSection: {
+      width: '100%',
+      marginTop: '1.5em',
+    },
+    legalHeading: {
+      fontWeight: 600,
+      color: '#333',
+      marginBottom: '0.5em',
+    },
+    legalScrollContainer: {
+      border: '1px solid #ddd',
+      borderRadius: '4px',
+      padding: '0.75em',
+      maxHeight: '150px',
+      overflowY: 'auto',
+      backgroundColor: '#fafafa',
+    },
+    legalParagraph: {
+      marginBottom: '0.75em',
+      color: '#555',
+    },
+    legalCheckbox: {
+      marginTop: '0.5em',
+      alignSelf: 'flex-start',
+    },
+    legalHelper: {
+      marginTop: '0.25em',
+      color: '#b26a00',
+    },
     oauthButton: {
       margin: '8px 0',
       padding: '12px',
@@ -124,6 +152,10 @@ const useStyles = makeStyles((theme: Theme) =>
       marginRight: '6px',
       color: theme.palette.primary.main,
     },
+    oauthDisabledText: {
+      marginTop: '0.5em',
+      color: '#c62828',
+    },
     loadingContainer: {
       display: 'flex',
       flexDirection: 'column',
@@ -142,8 +174,17 @@ export const Login: React.FC = () => {
   const [isLoading, setIsLoading] = React.useState(false);
   const [snackMessageOpen, setSnackMessageOpen] = React.useState(false);
   const [snackMessage, setSnackMessage] = React.useState('');
+  const [legalAcknowledged, setLegalAcknowledged] = React.useState(false);
+  const [legalScrollComplete, setLegalScrollComplete] = React.useState(false);
 
-  const {setDisplayName} = useUser();
+  const oauthDisabled = !legalAcknowledged;
+
+  const handleLegalScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    const element = event.currentTarget;
+    if (element.scrollTop + element.clientHeight >= element.scrollHeight - 4) {
+      setLegalScrollComplete(true);
+    }
+  };
 
   const handleSnackMessageClose = (
     _: React.SyntheticEvent,
@@ -207,6 +248,54 @@ export const Login: React.FC = () => {
             <Typography variant="subtitle1" className={classes.subtitle}>
               Please sign in to continue
             </Typography>
+
+            <div className={classes.legalSection}>
+              <Typography variant="subtitle2" className={classes.legalHeading}>
+                Review the legal notice before continuing
+              </Typography>
+              <div
+                className={classes.legalScrollContainer}
+                onScroll={handleLegalScroll}
+              >
+                {legalNoticeParagraphs.map((paragraph, idx) => (
+                  <Typography
+                    key={`legal-${idx}`}
+                    variant="body2"
+                    className={classes.legalParagraph}
+                  >
+                    {paragraph}
+                  </Typography>
+                ))}
+                <Typography variant="body2" className={classes.legalParagraph}>
+                  Detailed governance guidance lives in the{' '}
+                  <MuiLink
+                    href="https://github.com/ibpsa/project1-boptest/blob/main/docs"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    BOPTEST documentation
+                  </MuiLink>
+                  .
+                </Typography>
+              </div>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    color="primary"
+                    checked={legalAcknowledged}
+                    disabled={!legalScrollComplete}
+                    onChange={(_, checked) => setLegalAcknowledged(checked)}
+                  />
+                }
+                label="I have read and agree to the access requirements above."
+                className={classes.legalCheckbox}
+              />
+              {!legalScrollComplete && (
+                <Typography variant="caption" className={classes.legalHelper}>
+                  Scroll through the entire notice to enable the acknowledgement checkbox.
+                </Typography>
+              )}
+            </div>
             
             <div className={classes.oauthSection}>
               <Button
@@ -216,6 +305,7 @@ export const Login: React.FC = () => {
                 size="large"
                 startIcon={<GoogleIcon style={{ color: '#4285F4' }} />}
                 onClick={() => setIsLoading(true)}
+                disabled={oauthDisabled}
               >
                 Continue with Google
               </Button>
@@ -227,9 +317,15 @@ export const Login: React.FC = () => {
                 startIcon={<GitHubIcon />}
                 size="large"
                 onClick={() => setIsLoading(true)}
+                disabled={oauthDisabled}
               >
                 Continue with GitHub
               </Button>
+              {oauthDisabled && (
+                <Typography variant="caption" className={classes.oauthDisabledText}>
+                  Legal acknowledgement required before OAuth sign up is enabled.
+                </Typography>
+              )}
             </div>
             
             <div className={classes.privacyInfo}>

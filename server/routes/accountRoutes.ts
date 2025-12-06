@@ -11,6 +11,7 @@ type AuthedAccount = Account & {
 };
 
 export const accountRouter = express.Router();
+accountRouter.use(authorizer);
 
 accountRouter.get('/info', (req: express.Request, res: express.Response) => {
   if (req.session && req.session.userId) {
@@ -42,8 +43,6 @@ accountRouter.get('/info', (req: express.Request, res: express.Response) => {
     shareAllResults: false,
   });
 });
-
-accountRouter.use(authorizer);
 
 function requireAccount(req: express.Request, res: express.Response): AuthedAccount | null {
   if (req.user) {
