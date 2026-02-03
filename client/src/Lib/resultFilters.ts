@@ -19,6 +19,7 @@ export interface ResultFilterRequest {
 export interface FilterChangePayload {
   buildingTypeName: string;
   filters: FilterValues;
+  includeAdvancedFilters?: boolean;
 }
 
 export const buildFilterRequest = (
@@ -38,23 +39,25 @@ export const buildFilterRequest = (
     }
   }
 
-  const scenarioEntries = Object.entries(
-    payload.filters.scenario || {}
-  ).filter(([, value]) => value !== undefined && value !== null && value !== '');
-  if (scenarioEntries.length > 0) {
-    const scenarioObject: Record<string, string> = {};
-    scenarioEntries.forEach(([key, value]) => {
-      scenarioObject[key] = String(value);
-    });
-    request.scenario = scenarioObject;
-  }
+  if (payload.includeAdvancedFilters) {
+    const scenarioEntries = Object.entries(
+      payload.filters.scenario || {}
+    ).filter(([, value]) => value !== undefined && value !== null && value !== '');
+    if (scenarioEntries.length > 0) {
+      const scenarioObject: Record<string, string> = {};
+      scenarioEntries.forEach(([key, value]) => {
+        scenarioObject[key] = String(value);
+      });
+      request.scenario = scenarioObject;
+    }
 
-  if (payload.filters.tags && payload.filters.tags.length > 0) {
-    request.tags = payload.filters.tags;
-  }
+    if (payload.filters.tags && payload.filters.tags.length > 0) {
+      request.tags = payload.filters.tags;
+    }
 
-  if (payload.filters.boptestVersion) {
-    request.boptestVersion = payload.filters.boptestVersion;
+    if (payload.filters.boptestVersion) {
+      request.boptestVersion = payload.filters.boptestVersion;
+    }
   }
 
   const assignRange = (
@@ -73,14 +76,16 @@ export const buildFilterRequest = (
     }
   };
 
-  assignRange(payload.filters.cost, 'costMin', 'costMax');
-  assignRange(payload.filters.energy, 'energyMin', 'energyMax');
-  assignRange(
-    payload.filters.thermalDiscomfort,
-    'thermalDiscomfortMin',
-    'thermalDiscomfortMax'
-  );
-  assignRange(payload.filters.aqDiscomfort, 'aqDiscomfortMin', 'aqDiscomfortMax');
+  if (payload.includeAdvancedFilters) {
+    assignRange(payload.filters.cost, 'costMin', 'costMax');
+    assignRange(payload.filters.energy, 'energyMin', 'energyMax');
+    assignRange(
+      payload.filters.thermalDiscomfort,
+      'thermalDiscomfortMin',
+      'thermalDiscomfortMax'
+    );
+    assignRange(payload.filters.aqDiscomfort, 'aqDiscomfortMin', 'aqDiscomfortMax');
+  }
 
   return request;
 };

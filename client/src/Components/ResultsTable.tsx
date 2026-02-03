@@ -37,6 +37,7 @@ import {
   ResultFacet,
   BuildingScenarios,
 } from '../../../common/interfaces';
+import {FilterChangePayload} from '../Lib/resultFilters';
 import type {SelectProps} from '@material-ui/core/Select';
 import {
   createRows,
@@ -813,7 +814,7 @@ interface ResultsTableProps {
   onShareToggleComplete?: () => void;
   showDownloadButton?: boolean;
   isLoading?: boolean;
-  onFiltersChange?: (payload: {buildingTypeName: string; filters: FilterValues}) => void;
+  onFiltersChange?: (payload: FilterChangePayload) => void;
   hasMoreResults?: boolean;
   onLoadMoreResults?: () => void;
   isLoadingMoreResults?: boolean;
@@ -1120,7 +1121,11 @@ export default function ResultsTable(props: ResultsTableProps) {
     setFilters(normalized);
     filtersInitialized.current = true;
     setAreFiltersReady(true);
-    onFiltersChange?.({buildingTypeName: buildingTypeFilter, filters: normalized});
+    onFiltersChange?.({
+      buildingTypeName: buildingTypeFilter,
+      filters: normalized,
+      includeAdvancedFilters: true,
+    });
   };
 
   const handleViewModeChange = (
@@ -1203,7 +1208,11 @@ export default function ResultsTable(props: ResultsTableProps) {
     }
     filtersInitialized.current = true;
     setAreFiltersReady(true);
-    onFiltersChange?.({buildingTypeName: requestedBuilding, filters: nextFilters});
+    onFiltersChange?.({
+      buildingTypeName: requestedBuilding,
+      filters: nextFilters,
+      includeAdvancedFilters: false,
+    });
   };
 
   const handleRequestSort = (
