@@ -216,8 +216,7 @@ export async function getUserResultsPage(
         if (targetUid && !resultUid.includes(targetUid)) {
           return false;
         }
-      }
-      if (filters.buildingTypeName) {
+      } else if (filters.buildingTypeName) {
         const targetName = String(filters.buildingTypeName).toLowerCase();
         const resultName = String(buildingType?.name ?? '').toLowerCase();
         if (targetName && !resultName.includes(targetName)) {

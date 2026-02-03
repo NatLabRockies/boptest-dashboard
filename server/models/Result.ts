@@ -259,9 +259,7 @@ function applyFilterConditions(
   if (filters.buildingTypeUid) {
     params.push(String(filters.buildingTypeUid).toLowerCase());
     conditions.push(`LOWER(data->>'buildingTypeUid') = $${params.length}`);
-  }
-
-  if (filters.buildingTypeName) {
+  } else if (filters.buildingTypeName) {
     params.push(filters.buildingTypeName.toLowerCase());
     conditions.push(`LOWER(data->>'buildingTypeName') = $${params.length}`);
   }

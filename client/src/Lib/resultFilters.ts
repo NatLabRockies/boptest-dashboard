@@ -33,8 +33,9 @@ export const buildFilterRequest = (
     );
     if (facet) {
       request.buildingTypeUid = facet.buildingTypeUid;
+    } else {
+      request.buildingTypeName = payload.buildingTypeName;
     }
-    request.buildingTypeName = payload.buildingTypeName;
   }
 
   const scenarioEntries = Object.entries(
