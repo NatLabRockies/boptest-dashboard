@@ -24,6 +24,7 @@ import {
 } from '../models/Result';
 import {upsertResultFacet} from '../models/ResultFacet';
 import {DocumentRecord, JsonObject} from '../datastore/documentStore';
+import {getBoptestTestcaseIds} from '../utils/boptest';
 
 function jsonObjectToPlain(value: JsonObject | undefined | null): Record<string, any> {
   if (!value || typeof value !== 'object') {
@@ -333,8 +334,19 @@ async function createResultAndAssociatedModels(result: any) {
 }
 
 export async function createResults(results: any[]): Promise<PromiseSettledResult<void>[]> {
+  const testcaseIds = await getBoptestTestcaseIds();
   return Promise.allSettled(
     results.map(async (result: any) => {
+      if (testcaseIds) {
+        const uid = String(result?.buildingType?.uid ?? '').trim().toLowerCase();
+        const name = String(result?.buildingType?.name ?? '').trim().toLowerCase();
+        const matches =
+          (uid && testcaseIds.has(uid)) || (name && testcaseIds.has(name));
+        if (!matches) {
+          const details = uid || name || 'missing';
+          throw new Error(`Unknown test case uid/name: ${details}`);
+        }
+      }
       await createResultAndAssociatedModels(result);
     })
   );
